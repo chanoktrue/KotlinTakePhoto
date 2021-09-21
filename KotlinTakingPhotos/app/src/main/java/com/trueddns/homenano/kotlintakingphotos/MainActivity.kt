@@ -4,14 +4,23 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
+import androidx.core.graphics.BitmapCompat
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.jvm.Throws
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +34,10 @@ class MainActivity : AppCompatActivity() {
         findViewById(R.id.imageView)
     }
 
+    val showButton: Button by lazy {
+        findViewById(R.id.showButton)
+    }
+
     val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
@@ -32,12 +45,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    var bitmap: Bitmap? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         takePictrueButton.setOnClickListener {
             takePhoto()
+        }
+
+        showButton.setText("Show Picture")
+        showButton.setOnClickListener {
+            tapShowButton()
         }
     }
 
@@ -47,8 +67,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getPhoto(data: Intent?) {
-        val imageBitMap: Bitmap = data?.extras?.get("data") as Bitmap
-        imageView.setImageBitmap(imageBitMap)
+        bitmap = data?.extras?.get("data") as Bitmap
+        imageView.setImageBitmap(bitmap)
+    }
+
+    private  fun tapShowButton() {
+
+        if (bitmap == null) return
+
+        val intent = Intent(this, DetailActivity::class.java)
+        intent.putExtra("image", bitmap)
+        startActivity(intent)
+
     }
 
 }
+
+
